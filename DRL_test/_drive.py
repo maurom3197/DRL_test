@@ -45,7 +45,7 @@ def _init_drive(self, frequency = 20):
 def send_cmd_vel(self,linear_speed, angular_speed):
 	twist = Twist() #void instance created
 	
-	if (linear_speed or angular) is None:
+	if (linear_speed or angular_speed) is None:
 		pass #null action (0,0)
 	else:
 		twist.linear.x = float(linear_speed) #tf2rl libraries use numpy.float32
@@ -61,6 +61,15 @@ def cmd_vel_timer_cb(self):
 	# 4) manda comando di velocità
 
 	# compute state
-	state = self.update_observation()
+	#state = self.update_observation_lidar()
+	#time1 = time.time()
+	state = self.update_observation_camera()
+	goal = state[0]
+	#print('goal distance: ', state[0])
+	#print('goal angle: ', state[1])
+	depth_image = state[1]
+
 	# compute action
-	self.send_cmd_vel(*self.agent.get_action(np.array(state)))
+	#self.send_cmd_vel(*self.agent.get_action(np.array(state)))
+	self.send_cmd_vel(*self.agent.get_action(goal, depth_image))
+	#print(-time1+time.time())

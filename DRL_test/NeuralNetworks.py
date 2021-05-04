@@ -7,8 +7,8 @@ from tensorflow.keras.layers import Activation
 from tensorflow.keras.layers import Dense, Conv2D, GlobalAveragePooling2D, MaxPooling2D, BatchNormalization
 from tensorflow.keras.layers import Dropout 
 from tensorflow.keras.layers import Input, concatenate
-from tensorflow.keras.initializers import RandomUniform, glorot_normal, HeUniform, GlorotUniform
-from tensorflow.keras.models import load_model
+from tensorflow.keras.initializers import RandomUniform, GlorotUniform
+#from tensorflow.keras.initializers import HeUniform
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.losses import mean_squared_error
 from tensorflow.keras import backend as K
@@ -164,7 +164,7 @@ class ActorCNNetwork(Model):
 		self.goal_shape = (2,)
 		
 		#Hidden Layer
-		self.k_initializer = HeUniform()
+		self.k_initializer = GlorotUniform()
 		self.conv1 = Conv2D(self.conv1_dims, self.filt1_size, strides=(1, 1), activation='relu', kernel_initializer = self.k_initializer)
 		self.conv1_1 = Conv2D(self.conv1_dims, self.filt1_size, strides=(1, 1), activation='relu', kernel_initializer = self.k_initializer)
 		self.max_pool = MaxPooling2D(pool_size=(2, 2), strides=(2,2))
@@ -242,7 +242,7 @@ class CriticCNNetwork(Model):
 		self.model_name = name
 
 		#Hidden Layer
-		self.k_initializer = HeUniform()
+		self.k_initializer = GlorotUniform()
 		self.conv1 = Conv2D(self.conv1_dims, self.filt1_size, strides=(1, 1), activation='relu', kernel_initializer = self.k_initializer)
 		self.conv1_1 = Conv2D(self.conv1_dims, self.filt1_size, strides=(1, 1), activation='relu', kernel_initializer = self.k_initializer)
 		self.max_pool = MaxPooling2D(pool_size=(2, 2), strides=(2,2))

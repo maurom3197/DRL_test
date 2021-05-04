@@ -3,6 +3,7 @@
 # General purpose
 import time
 import numpy as np
+import tensorflow as tf
 import math
 
 # ROS related
@@ -24,9 +25,8 @@ from rclpy.qos import qos_profile_sensor_data
 # others
 
 import collections
-
-
-
+import cv2
+from cv_bridge import CvBridge
 
 
 # ODOMETRY
@@ -82,35 +82,66 @@ def generic_laser_scan_cb(self, msg):
 
 
 ######################################################################
-
-def update_observation(self, lidar_points = 36):
+def update_observation_lidar(self, lidar_points = 36):
 	processed_lidar = laserscan_2_n_points_list(
 		clean_laserscan(self.laser_scan_msg),\
 		lidar_points
 	)
-	x, y, yaw = pose_2_xyyaw(self.odometry_msg)
-	goal_distance = goal_pose_to_distance(x,y,self.goal_pos_x, self.goal_pos_y)
-	goal_angle = goal_pose_to_angle(x,y,yaw, self.goal_pos_x, self.goal_pos_y)
+	#x, y, yaw = pose_2_xyyaw(self.odometry_msg)
+	#goal_distance = goal_pose_to_distance(x,y,self.goal_pos_x, self.goal_pos_y)
+	#goal_angle = goal_pose_to_angle(x,y,yaw, self.goal_pos_x, self.goal_pos_y)
+	goal_distance, goal_angle, pos_x, pos_y, yaw = process_odom(self.odometry_msg, self.goal_pos_x, self.goal_pos_y)
+
 	return ([goal_distance] + \
 			[goal_angle] 	+ \
 			processed_lidar)
 
+def update_observation_camera(self, image_height = 120, image_width = 160):
+	processed_depth_image = process_depth_image(self.generic_depth_camera_img,\
+		image_height, image_width)
 
-def laserscan_2_n_points_list(laserscan_data, n_points = 60):
+	# x, y, yaw = pose_2_xyyaw(self.odometry_msg)
+	# goal_distance = goal_pose_to_distance(x,y,self.goal_pos_x, self.goal_pos_y)
+	# goal_angle = goal_pose_to_angle(x,y,yaw, self.goal_pos_x, self.goal_pos_y)
+	goal_distance, goal_angle, pos_x, pos_y, yaw = process_odom(self.odometry_msg, self.goal_pos_x, self.goal_pos_y)
+	goal_info = np.array([goal_distance, goal_angle], dtype=np.float32)
+	goal_info = tf.convert_to_tensor(goal_info)
+
+	return (goal_info, processed_depth_image)
+
+def laserscan_2_n_points_list(laserscan_data, n_points = 36):
 	n_points_list = []
 	len_laserscan_data = len(laserscan_data.ranges)
 	for index in range(n_points):
 		n_points_list.append(\
 			laserscan_data.ranges[int(index*len_laserscan_data/n_points)]
 			)
+
 	return n_points_list #type: list (of float)
 
-def pose_2_xyyaw(odometry_data):
-	# odometry_data:  nav_msgs/msg/Odometry
-	pos_x = odometry_data.pose.pose.position.x
-	pos_y = odometry_data.pose.pose.position.y
-	_,_,yaw = euler_from_quaternion(odometry_data.pose.pose.orientation)
-	return pos_x, pos_y, yaw #floats
+def process_odom(odom_msg, goal_pose_x, goal_pose_y):
+
+	pos_x = odom_msg.pose.pose.position.x
+	pos_y = odom_msg.pose.pose.position.y
+	_,_,yaw = euler_from_quaternion(odom_msg.pose.pose.orientation)
+
+	goal_distance = math.sqrt(
+		(goal_pose_x-pos_x)**2
+		+ (goal_pose_y-pos_y)**2)
+
+	path_theta = math.atan2(
+		goal_pose_y-pos_y,
+		goal_pose_x-pos_x)
+
+	goal_angle = path_theta - yaw
+
+	if goal_angle > math.pi:
+		goal_angle -= 2 * math.pi
+
+	elif goal_angle < -math.pi:
+		goal_angle += 2 * math.pi
+
+	return goal_distance, goal_angle, pos_x, pos_y, yaw
 
 def euler_from_quaternion(quat):
 	"""
@@ -135,25 +166,8 @@ def euler_from_quaternion(quat):
 
 	return roll, pitch, yaw
 
-def goal_pose_to_distance(pos_x, pos_y, goal_pos_x, goal_pos_y):
-	return math.sqrt((goal_pos_x-pos_x)**2
-			+ (goal_pos_y-pos_y)**2)
 
-def goal_pose_to_angle(pos_x, pos_y, yaw,goal_pos_x, goal_pos_y):
-		path_theta = math.atan2(
-			goal_pos_y-pos_y,
-			goal_pos_y-pos_x)
-
-		goal_angle = path_theta - yaw
-
-		if goal_angle > math.pi:
-			goal_angle -= 2 * math.pi
-
-		elif goal_angle < -math.pi:
-			goal_angle += 2 * math.pi
-		return goal_angle
-
-def clean_laserscan(laserscan_data, laser_range = 3.5):
+def clean_laserscan(laserscan_data, laser_range = 5):
 	# Takes only sensed measurements
 	for i in range(359):
 		if laserscan_data.ranges[i] == float('Inf'):
@@ -164,3 +178,34 @@ def clean_laserscan(laserscan_data, laser_range = 3.5):
 			pass # leave range as it is
 	return laserscan_data
 
+def process_depth_image(image, height, width):
+	img = np.array(image, dtype= np.float32)
+	cutoff = 8
+	#check crop is performed correctly
+	#img = tf.convert_to_tensor(self.depth_image_raw, dtype=tf.float32)
+	#img = img.reshape(240,320,1)
+	img = tf.reshape(img, [height,width,1])
+	#width =304
+	#height = 228
+	#h_off = int((240-height)*0.5)
+	#w_off = int((320-width)*0.5)
+	#img_crop = tf.image.crop_to_bounding_box(img,h_off,w_off,height,width)
+	img_resize = tf.image.resize(img,[60,80])
+	depth_image = tf.reshape(img_resize, [60,80])
+	depth_image = np.array(depth_image, dtype= np.float32)
+	depth_image = depth_rescale(depth_image, cutoff)
+	final_image_size = depth_image.shape
+	return depth_image
+
+def depth_rescale(img, cutoff):
+	#Useful to turn the background into black into the depth images.
+	w,h = img.shape
+	#new_img = np.zeros([w,h,3])
+	img = img.flatten()
+	img[np.isnan(img)] = cutoff
+	img[img>cutoff] = cutoff
+	img = img.reshape([w,h])
+	#img = img/cutoff
+	#img_visual = 255*(self.depth_image_raw/cutoff)
+	img = np.array(img, dtype=np.float32)
+	return img 

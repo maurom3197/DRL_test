@@ -27,11 +27,6 @@ from std_msgs.msg import Float32MultiArray
 import collections
 
 
-
-
-
-# ODOMETRY
-
 def _init_goal_subscription(self):
 	self.get_logger().info('/goal subscription')
 	self.goal_sub = self.create_subscription(
@@ -44,14 +39,17 @@ def _init_goal_subscription(self):
 
 def goal_cb(self, msg):
 	self.get_logger().info('/goal Msg received')
-	self.get_logger().info(str(msg.data))
-	self.get_logger().info(str(msg.data[0]))
+	#self.get_logger().info(str(msg.data))
+	#self.get_logger().info(str(msg.data[0]))
+	self.get_logger().info('Goal position: x '+str(msg.data[0])+' y '+str(msg.data[1]))
 	self.goal_pos_x = msg.data[0]
 	self.goal_pos_y = msg.data[1]
 
 
+
 #to send a goal msg via shell
-"""ros2 topic pub /goal std_msgs/g/Float32MultiArray "layout:
+"""
+ros2 topic pub /goal std_msgs/g/Float32MultiArray "layout:
   dim:
   - label: ''
     size: 0
