@@ -49,7 +49,7 @@ def goal_cb(self, msg):
 
 #to send a goal msg via shell
 """
-ros2 topic pub /goal std_msgs/g/Float32MultiArray "layout:
+ros2 topic pub /goal std_msgs/msg/Float32MultiArray "layout:
   dim:
   - label: ''
     size: 0
