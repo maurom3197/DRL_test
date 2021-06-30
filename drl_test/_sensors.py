@@ -200,7 +200,7 @@ def process_depth_image(image, height, width):
 	#cv2.imshow('RealSense', depth_colormap)
 	#cv2.waitKey(1)
 
-	cutoff = 8000 #mm for the hardware camera sensor
+	cutoff = 8 # mm for the hardware camera sensor, m in simulation
 	img = tf.reshape(img, [height,width,1])
 
 	# FOR CROPPING IMAGE
@@ -229,6 +229,6 @@ def depth_rescale(img, cutoff):
 	img[np.isnan(img)] = cutoff
 	img[img>cutoff] = cutoff
 	img = img.reshape([w,h])
-	img = img/1000
+	img = img/cutoff
 
 	return img 

@@ -8,7 +8,7 @@ from tensorflow.keras.layers import Dense, Conv2D, GlobalAveragePooling2D, MaxPo
 from tensorflow.keras.layers import Dropout 
 from tensorflow.keras.layers import Input, concatenate
 from tensorflow.keras.initializers import RandomUniform, GlorotUniform
-#from tensorflow.keras.initializers import HeUniform
+from tensorflow.keras.initializers import HeUniform
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.losses import mean_squared_error
 from tensorflow.keras import backend as K
@@ -164,7 +164,7 @@ class ActorCNNetwork(Model):
 		self.goal_shape = (2,)
 		
 		#Hidden Layer
-		self.k_initializer = GlorotUniform()
+		self.k_initializer = HeUniform()
 		self.conv1 = Conv2D(self.conv1_dims, self.filt1_size, strides=(1, 1), activation='relu', kernel_initializer = self.k_initializer)
 		self.conv1_1 = Conv2D(self.conv1_dims, self.filt1_size, strides=(1, 1), activation='relu', kernel_initializer = self.k_initializer)
 		self.max_pool = MaxPooling2D(pool_size=(2, 2), strides=(2,2))
@@ -177,13 +177,13 @@ class ActorCNNetwork(Model):
 		self.linear_out = Dense(1, activation = 'sigmoid')
 		self.angular_out = Dense(1, activation = 'tanh')
 		
-		# dummy_goal = tf.constant(
-		# 	np.zeros(shape=(1,) + self.goal_shape, dtype=np.float32))
-		# dummy_image = tf.constant(
-		# 	np.zeros(shape= self.image_shape, dtype=np.float32))
+		dummy_goal = tf.constant(
+			np.zeros(shape=(1,) + self.goal_shape, dtype=np.float32))
+		dummy_image = tf.constant(
+			np.zeros(shape= self.image_shape, dtype=np.float32))
 
 		self.model()
-		#self(dummy_goal, dummy_image)
+		self(dummy_goal, dummy_image)
 
 	def call(self, goal, depth_image):
 		c1 = self.conv1(depth_image)
@@ -242,7 +242,7 @@ class CriticCNNetwork(Model):
 		self.model_name = name
 
 		#Hidden Layer
-		self.k_initializer = GlorotUniform()
+		self.k_initializer = HeUniform()
 		self.conv1 = Conv2D(self.conv1_dims, self.filt1_size, strides=(1, 1), activation='relu', kernel_initializer = self.k_initializer)
 		self.conv1_1 = Conv2D(self.conv1_dims, self.filt1_size, strides=(1, 1), activation='relu', kernel_initializer = self.k_initializer)
 		self.max_pool = MaxPooling2D(pool_size=(2, 2), strides=(2,2))
@@ -256,15 +256,15 @@ class CriticCNNetwork(Model):
 		#Output Layer
 		self.out = Dense(1, activation='linear')
 		
-		# dummy_goal = tf.constant(
-		# 	np.zeros(shape = (1,) + self.goal_shape, dtype=np.float32))
-		# dummy_image = tf.constant(
-		# 	np.zeros(shape = self.image_shape, dtype=np.float32))
-		# dummy_action = tf.constant(
-		# 	np.zeros(shape = (1, 2,), dtype=np.float32))
+		dummy_goal = tf.constant(
+			np.zeros(shape = (1,) + self.goal_shape, dtype=np.float32))
+		dummy_image = tf.constant(
+			np.zeros(shape = self.image_shape, dtype=np.float32))
+		dummy_action = tf.constant(
+			np.zeros(shape = (1, 2,), dtype=np.float32))
 
-		# #self(dummy_goal, dummy_image, dummy_action)
 		self.model()
+		self(dummy_goal, dummy_image, dummy_action)
 
 	def call(self, goal, depth_image, action):
 		c1 = self.conv1(depth_image)

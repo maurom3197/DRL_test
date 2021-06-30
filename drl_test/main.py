@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import os
-os.environ["CUDA_VISIBLE_DEVICES"]="-1" 
+#os.environ["CUDA_VISIBLE_DEVICES"]="-1" 
 import tensorflow as tf
 
 gpus = tf.config.experimental.list_physical_devices('GPU')
@@ -19,7 +19,7 @@ if gpus:
 import rclpy
 from rclpy.node import Node
 
-ROBOT = "waffle_r200"
+ROBOT = "jackal"
 SENSOR = "camera"
 #ROBOT = os.environ['ROBOT']
 #SENSOR = os.environ['SENSOR']

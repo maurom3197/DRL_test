@@ -28,8 +28,8 @@ def _init_agent_lidar(self):
 	self.agent = DDPGLidarAgent(
 			state_size = 38, 
 			action_size = 2, 
-			max_linear_vel = 0.25,
-			max_angular_vel = 1.5,
+			max_linear_vel = 0.5,
+			max_angular_vel = 1.0,
 			load = True
 			)
 
@@ -37,15 +37,15 @@ def _init_agent_camera(self):
 	self.agent = DDPGVisualAgent(
 			state_size = 3, 
 			action_size = 2, 
-			max_linear_vel = 0.25,
-			max_angular_vel = 1.5,
+			max_linear_vel = 0.5,
+			max_angular_vel = 1.0,
 			load = True
 			)
 
 
 class DDPGLidarAgent:
 
-	def __init__(self, state_size, action_size = 2, max_linear_vel = 0.8, max_angular_vel = 2, load = True):
+	def __init__(self, state_size, action_size = 2, max_linear_vel = 0.5, max_angular_vel = 1.0, load = True):
 
 
 		# State size and action size
@@ -66,12 +66,12 @@ class DDPGLidarAgent:
 			#	self.actor.model_dir_path,
 			#	'actor_stage1_episode'+str(self.load_episode)+'.h5')
 			model_dir_path = os.path.dirname(os.path.realpath(__file__))
-			actor_dir_path = model_dir_path + "/agent_weights/waffle/lidar/actor_weights_episode" + str(self.load_episode)+ ".h5"
+			actor_dir_path = model_dir_path + "/agent_weights/jackal/lidar/actor_weights_episode" + str(self.load_episode)+ ".h5"
 			self.actor.load_weights(actor_dir_path)
 
 
 	def get_action(self, state):
-		if state[0] < 0.10:
+		if state[0] < 0.15:
 			print('Goal reached...')
 			return np.array([0.0, 0.0], dtype= np.float32)
 
@@ -83,7 +83,7 @@ class DDPGLidarAgent:
 
 class DDPGVisualAgent:
 
-	def __init__(self, state_size, image_height=60, image_width=80, action_size = 2, max_linear_vel = 0.8, max_angular_vel = 2, load = True):
+	def __init__(self, state_size, image_height=60, image_width=80, action_size = 2, max_linear_vel = 0.5, max_angular_vel = 1.0, load = True):
 
 
 		# State size and action size
@@ -98,19 +98,19 @@ class DDPGVisualAgent:
 		#Load Models
 
 		self.load = load
-		self.load_episode = 2400
+		self.load_episode = 3200
 
 		if self.load:
 			#actor_dir_path = os.path.join(
 			#	self.actor.model_dir_path,
 			#	'actor_stage1_episode'+str(self.load_episode)+'.h5')
 			model_dir_path = os.path.dirname(os.path.realpath(__file__))
-			actor_dir_path = model_dir_path + "/agent_weights/waffle/camera/actor_weights_episode" + str(self.load_episode)+ ".h5"
+			actor_dir_path = model_dir_path + "/agent_weights/jackal/camera/actor_weights_episode" + str(self.load_episode)+ ".h5"
 			self.actor.load_weights(actor_dir_path)
     
 
 	def get_action(self, goal, depth_image):
-		if goal[0] < 0.14:
+		if goal[0] < 0.15:
 			print('Goal reached...')
 			return np.array([0.0, 0.0], dtype= np.float32)
 
@@ -118,5 +118,5 @@ class DDPGVisualAgent:
 		depth_image = tf.reshape(depth_image, [1,self.image_height, self.image_width,1])
 		pred_action = self.actor(goal, depth_image)
 		print("pred_action:", pred_action)
-		#return tf.reshape(pred_action, [2,])
-		return np.array([0.0, 0.0], dtype= np.float32)
+		return tf.reshape(pred_action, [2,])
+		#return np.array([0.0, 0.0], dtype= np.float32)
