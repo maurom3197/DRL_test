@@ -55,6 +55,6 @@ ros2 topic pub /goal std_msgs/msg/Float32MultiArray "layout:
     size: 0
     stride: 0
   data_offset: 0
-data: [2.0, 3.0]"
+data: [1.5, 0.0]"
 """
 

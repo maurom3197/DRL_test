@@ -19,6 +19,12 @@ if gpus:
 import rclpy
 from rclpy.node import Node
 
+ROBOT = "waffle_r200"
+SENSOR = "camera"
+#ROBOT = os.environ['ROBOT']
+#SENSOR = os.environ['SENSOR']
+WORLD = "stage1"
+#WORLD = os.environ['WORLD']
 
 class RobotNavigation(Node):
 	from _sensors import _init_odometry, odometry_sensor_cb
@@ -26,7 +32,7 @@ class RobotNavigation(Node):
 	from _sensors import _init_lidar, generic_laser_scan_cb
 	from _sensors import update_observation_lidar, update_observation_camera
 
-	from _drive import _init_drive, send_cmd_vel, cmd_vel_timer_cb
+	from _drive import _init_drive_lidar, _init_drive_camera, send_cmd_vel, cmd_vel_timer_cb_lidar, cmd_vel_timer_cb_camera
 
 	from _goal import _init_goal_subscription, goal_cb
 
@@ -34,13 +40,19 @@ class RobotNavigation(Node):
 
 	def __init__(self):
 		super().__init__("drl_navigation")
-		rclpy.logging.set_logger_level('pic4rl', 10)
+		#rclpy.logging.set_logger_level('drl_navigation', 10)
 
 		self._init_odometry()   # msg --> self.odometry_msg
 
-		self._init_camera()     # msg --> self.generic_depth_camera_img
-
-		#self._init_lidar()      # msg --> self.laser_scan_msg
+		if SENSOR == "camera":
+			self.image_height = 480
+			self.image_width = 640
+			# msg --> self.generic_depth_camera_img
+			self._init_camera(topic = '/camera/depth/image_raw')  
+		elif SENSOR == "lidar":
+			self.lidar_points = 36
+			# msg --> self.laser_scan_msg
+			self._init_lidar()      
 
 		# initialize also publisher for cmd_vel
 		# with a timer, to set a control frequency
@@ -49,17 +61,27 @@ class RobotNavigation(Node):
 		while True:
 			try:
 				rclpy.spin_once(self, timeout_sec=5)
-				#self.laser_scan_msg
-				self.generic_depth_camera_img
+				
+				if SENSOR == "camera":
+					self.generic_depth_camera_img
+				elif SENSOR == "lidar":
+					self.laser_scan_msg
+
 				self.odometry_msg
 				break
 			except:
 				pass
 
-		self._init_drive(frequency = 20)
-
-		#self._init_agent_lidar()
-		self._init_agent_camera()
+		if SENSOR == "camera":
+			self._init_drive_camera(frequency = 15)
+			self._init_agent_camera()
+		elif SENSOR == "lidar":
+			self._init_drive_lidar(frequency = 20)
+			self._init_agent_lidar()
+		else:
+			print('No sensor specified')
+			print(SENSOR)
+		
 
 
 

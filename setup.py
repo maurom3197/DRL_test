@@ -1,6 +1,6 @@
 from setuptools import setup
 
-package_name = 'DRL_test'
+package_name = 'drl_test'
 
 setup(
     name=package_name,
@@ -20,7 +20,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-	'drl_test = DRL_test.main:main'
+	'drl_test = drl_test.main:main',
+	'realsense_py = drl_test.realsense_py:main'
         ],
     },
 )
