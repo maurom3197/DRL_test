@@ -28,8 +28,8 @@ def _init_agent_lidar(self):
 	self.agent = DDPGLidarAgent(
 			state_size = 38, 
 			action_size = 2, 
-			max_linear_vel = 0.5,
-			max_angular_vel = 1.0,
+			max_linear_vel = 0.8,
+			max_angular_vel = 2.0,
 			load = True
 			)
 
@@ -37,15 +37,15 @@ def _init_agent_camera(self):
 	self.agent = DDPGVisualAgent(
 			state_size = 3, 
 			action_size = 2, 
-			max_linear_vel = 0.5,
-			max_angular_vel = 1.0,
+			max_linear_vel = 0.8,
+			max_angular_vel = 2.0,
 			load = True
 			)
 
 
 class DDPGLidarAgent:
 
-	def __init__(self, state_size, action_size = 2, max_linear_vel = 0.5, max_angular_vel = 1.0, load = True):
+	def __init__(self, state_size, action_size = 2, max_linear_vel = 0.6, max_angular_vel = 1.5, load = True):
 
 
 		# State size and action size
@@ -59,14 +59,14 @@ class DDPGLidarAgent:
 		#Load Models
 
 		self.load = load
-		self.load_episode = 2800
+		self.load_episode = 4000
 
 		if self.load:
 			#actor_dir_path = os.path.join(
 			#	self.actor.model_dir_path,
 			#	'actor_stage1_episode'+str(self.load_episode)+'.h5')
 			model_dir_path = os.path.dirname(os.path.realpath(__file__))
-			actor_dir_path = model_dir_path + "/agent_weights/jackal/lidar/actor_weights_episode" + str(self.load_episode)+ ".h5"
+			actor_dir_path = model_dir_path + "/agent_weights/rosbot/lidar/actor_weights_episode" + str(self.load_episode)+ ".h5"
 			self.actor.load_weights(actor_dir_path)
 
 
@@ -83,7 +83,7 @@ class DDPGLidarAgent:
 
 class DDPGVisualAgent:
 
-	def __init__(self, state_size, image_height=60, image_width=80, action_size = 2, max_linear_vel = 0.5, max_angular_vel = 1.0, load = True):
+	def __init__(self, state_size, image_height=60, image_width=80, action_size = 2, max_linear_vel = 0.6, max_angular_vel = 1.5, load = True):
 
 
 		# State size and action size
@@ -98,14 +98,14 @@ class DDPGVisualAgent:
 		#Load Models
 
 		self.load = load
-		self.load_episode = 3200
+		self.load_episode = 2500
 
 		if self.load:
 			#actor_dir_path = os.path.join(
 			#	self.actor.model_dir_path,
 			#	'actor_stage1_episode'+str(self.load_episode)+'.h5')
 			model_dir_path = os.path.dirname(os.path.realpath(__file__))
-			actor_dir_path = model_dir_path + "/agent_weights/jackal/camera/actor_weights_episode" + str(self.load_episode)+ ".h5"
+			actor_dir_path = model_dir_path + "/agent_weights/rosbot/camera/camera3/actor_weights_episode" + str(self.load_episode)+ ".h5"
 			self.actor.load_weights(actor_dir_path)
     
 

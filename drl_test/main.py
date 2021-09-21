@@ -19,7 +19,7 @@ if gpus:
 import rclpy
 from rclpy.node import Node
 
-ROBOT = "jackal"
+ROBOT = "rosbot"
 SENSOR = "camera"
 #ROBOT = os.environ['ROBOT']
 #SENSOR = os.environ['SENSOR']
@@ -45,8 +45,8 @@ class RobotNavigation(Node):
 		self._init_odometry()   # msg --> self.odometry_msg
 
 		if SENSOR == "camera":
-			self.image_height = 480
-			self.image_width = 640
+			self.image_height = 120
+			self.image_width = 160
 			# msg --> self.generic_depth_camera_img
 			self._init_camera(topic = '/camera/depth/image_raw')  
 		elif SENSOR == "lidar":
