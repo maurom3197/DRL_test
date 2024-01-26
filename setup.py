@@ -1,5 +1,6 @@
+import os
 from setuptools import setup
-
+from glob import glob
 package_name = 'drl_test'
 
 setup(
@@ -10,18 +11,22 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
+        (os.path.join('share', package_name, 'launch'),
+            glob(os.path.join('launch', '*.launch.py'))),
+        (os.path.join('share', package_name, 'config'),
+            glob(os.path.join('config', '*.yaml'))),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
-    maintainer='enricosutera',
-    maintainer_email='enricosutera@outlook.com',
+    maintainer='mauromartini',
+    maintainer_email='mauromartini@polito.it',
     description='TODO: Package description',
     license='TODO: License declaration',
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-	'drl_test = drl_test.main:main',
-	'realsense_py = drl_test.realsense_py:main'
+	'position_agnostic_test = drl_test.postion_agnostic_main:main',
+	'realsense_py = drl_test.utils.realsense_py:main'
         ],
     },
 )
