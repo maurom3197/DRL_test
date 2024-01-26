@@ -7,8 +7,7 @@ from drl_test.task.position_agnostic_crop_follow.position_agnostic_crop_follow i
 import tensorflow as tf
 import os 
 
-os.environ["CUDA_VISIBLE_DEVICES"]="-1" 
-
+#os.environ["CUDA_VISIBLE_DEVICES"]="-1" 
 gpus = tf.config.experimental.list_physical_devices('GPU')
 
 if gpus:
@@ -27,18 +26,18 @@ def main(args=None):
 
     drl_agent = DRLAgent()
 
-    drl_agent.get_logger().info('Spinning')
-    rclpy.spin(drl_agent)
-    drl_agent.destroy_node()
-    rclpy.shutdown()
+    # drl_agent.get_logger().info('Spinning')
+    # rclpy.spin(drl_agent)
+    # drl_agent.destroy_node()
+    # rclpy.shutdown()
 
-    # try:
-    #     # executor.spin()
-    #     drl_agent.threadFunc()
-    # except KeyboardInterrupt:
-    #     # executor.shutdown()
-    #     drl_agent.destroy_node()
-    #     rclpy.shutdown()
+    try:
+        # executor.spin()
+        drl_agent.execute()
+    except KeyboardInterrupt:
+        # executor.shutdown()
+        drl_agent.destroy_node()
+        rclpy.shutdown()
 
 if __name__ == "__main__":
     main()

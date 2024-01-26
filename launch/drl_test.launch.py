@@ -18,6 +18,6 @@ def generate_launch_description():
          executable='position_agnostic_main',
          namespace='',
          name='main_node',
-         parameters=[config]
+         parameters=[config, {"main_params_path":config}]
       )
    ])

@@ -16,7 +16,7 @@ main_node:
     goal_tolerance: 0.40
 
     # Model to load
-    model_path: "/root/gym_ws/src/PIC4rl_gym/pic4rl/trained_agents/covivio_SAC/20240123_121352.737161_camera_SAC_550k/model_camera_SAC_550k"
+    model_path: "/root/gym_ws/src/DRL_test/drl_test/agent_weights/jackal/position_agnostic_depth_SAC_covivio/20240123_121352.737161_camera_SAC_250k/20240123T121354.560252_SAC_"
     logdir: 'src/Results' # (str) Output directory name. The default is ``"results"`` (it is relative to workspace directory).
     # Testing with tflite models
     tflite_flag: False
@@ -30,15 +30,16 @@ main_node:
     task: 'Vineyards' # goToPose, Following, Vineyards
     
     # Sensors parameters
-    update_frequency: 15.0
+    update_frequency: 7.0
     sensor: 'camera' # lidar or camera
     visual_data: 'features'
     features: 12544
     channels: 1
+    odom_enabled: "false"
     imu_enabled: "false"
     camera_enabled: "true"
     stereo_camera_enabled: "false"
-    lidar_enabled: "true"
+    lidar_enabled: "false"
     sensors_topic:
       rgb_topic: "/camera_color/image_raw"
       depth_topic: "/camera_stereo/depth/image_raw" # "/camera_stereo/depth/image_raw" 
@@ -52,7 +53,7 @@ main_node:
       dist_cutoff: 5.0 # Meters
       width: 112
       height: 112
-      show_image: False
+      show_image: True
     rgb_param:
       width: 640
       height: 480

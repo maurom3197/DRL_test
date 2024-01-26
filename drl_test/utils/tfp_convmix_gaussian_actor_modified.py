@@ -1,8 +1,8 @@
 import numpy as np
 import tensorflow as tf
 import tensorflow_probability as tfp
-from tensorflow.keras.layers import Dense, Input, Conv2D, GlobalAveragePooling2D, MaxPooling2D
-from tensorflow.keras.initializers import RandomUniform, glorot_normal, HeUniform, GlorotUniform
+from tensorflow.keras.layers import Input, Conv2D, GlobalAveragePooling2D, MaxPooling2D
+from tensorflow.keras.initializers import HeUniform
 layers = tf.keras.layers
 
 
@@ -106,15 +106,12 @@ class ConvGaussianActor(tf.keras.Model):
 
         return tfp.distributions.MultivariateNormalDiag(loc=mean, scale_diag=tf.exp(log_std))
 
-    def call(self, states, test=False):
+    def call(self, states):
         """
         Compute actions and log probabilities of the selected action
         """
         dist = self._compute_dist(states)
-        if test:
-            raw_actions = dist.mean()
-        else:
-            raw_actions = dist.sample()
+        raw_actions = dist.mean()
         log_pis = dist.log_prob(raw_actions)
 
         if self._squash:
@@ -124,23 +121,11 @@ class ConvGaussianActor(tf.keras.Model):
         else:
             actions = raw_actions
 
-        #actions = tf.multiply(actions,tf.constant([self._max_action[0]*0.5, self._max_action[1]], dtype=tf.float32))
-        #actions += tf.constant([self._max_action[0]*0.5, 0.], dtype=tf.float32)
         act_width = (self._max_action - self._min_action)*0.5
         act_bias = (self._max_action + self._min_action)*0.5
         actions = tf.multiply(actions,act_width)
         actions += act_bias
         return actions, log_pis
-
-    def compute_log_probs(self, states, actions):
-        raw_actions = actions / self._max_action
-        dist = self._compute_dist(states)
-        logp_pis = dist.log_prob(raw_actions)
-        return logp_pis
-
-    def compute_entropy(self, states):
-        dist = self._compute_dist(states)
-        return dist.entropy()
 
     def model(self):
         return tf.keras.Model(inputs = self.state_input, outputs = self.call(self.state_input), name = self.model_name)

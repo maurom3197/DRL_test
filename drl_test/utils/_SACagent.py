@@ -84,7 +84,5 @@ class SACAgent():
     def _get_action_body(self, state, test):
         actions, _ = self.actor(state, test)
         return actions
-    
-    def load_weights(self, model_path):
-        self.actor.load_weights(model_path)
+
 

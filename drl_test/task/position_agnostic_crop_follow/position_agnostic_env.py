@@ -20,7 +20,8 @@ from drl_test.sensors import Sensors
 class DepthAgnosticEnv(Node):
     def __init__(self):
         super().__init__("depth_agnostic_env")
-        #rclpy.logging.set_logger_level('depth_agnostic_env', 10)
+        rclpy.logging.set_logger_level('depth_agnostic_env', 10)
+        self.declare_parameter("main_params_path", rclpy.Parameter.Type.STRING)
 
         self.declare_parameters(
             namespace="",
@@ -38,6 +39,7 @@ class DepthAgnosticEnv(Node):
             ],
         )
 
+        self.main_params_path = self.get_parameter("main_params_path").get_parameter_value().string_value
         self.goal_tolerance = (
             self.get_parameter("goal_tolerance").get_parameter_value().double_value
         )
@@ -66,8 +68,6 @@ class DepthAgnosticEnv(Node):
         qos = QoSProfile(depth=10)
         self.sensors = Sensors(self)
         self.spin_sensors_callbacks()
-
-        self.cmd_vel_pub = self.create_publisher(Twist, "cmd_vel", qos)
 
     def spin_sensors_callbacks(self):
         """ """
@@ -109,4 +109,4 @@ class DepthAgnosticEnv(Node):
         state = np.concatenate((vel, features))
         state = tf.constant(state, dtype=tf.float32)
         state = tf.expand_dims(state, 0) 
-        return state
+        return state.numpy()

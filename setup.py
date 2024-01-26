@@ -25,7 +25,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-	'position_agnostic_test = drl_test.postion_agnostic_main:main',
+	'position_agnostic_main = drl_test.position_agnostic_main:main',
 	'realsense_py = drl_test.utils.realsense_py:main'
         ],
     },
